@@ -14,16 +14,7 @@ A checkout holds no generated file. The runner runs `go mod tidy` and `go genera
 
 ## The judge
 
-`cmd/ratchet` is what slopfix's own `.github/ratchet` names. It builds binaries: the default branch's `slopfix` (its `check` is the verdict) and the branch's `slopfix` (its `fix` writes what the verdict judges). It materializes every case the default branch registers, repairs each with the branch's fix, and judges the result with the default branch's check. A case the default branch's check still flags is a failure.
+`cmd/ratchet` is what slopfix's own `.github/ratchet` names. It materializes every case the default branch registers, repairs each with the branch's fix, and judges the result with the default branch's check. A case the default branch's check still flags is a failure.
 
 That is what holds a branch to the guarantee. A rule it drops, a cap it loosens. A detection it narrows, or a repair it stops making leaves text the default branch's check still flags. A head that cannot be started is a failure, not a pass.
 
-## Files
-
-| Path | Role |
-|---|---|
-| `ratchet/run.go` | the runner: resolve the default branch, run its command |
-| `ratchet/ratchet.go` | the judge: pair the two binaries and run the cases |
-| `cmd/ratchet/main.go` | the judge's entry point, named by `.github/ratchet` |
-| `cmd/ratchet.go` | the `ratchet` command that runs the runner |
-| `.github/ratchet` | this repository's entry point: `go run ./cmd/ratchet` |

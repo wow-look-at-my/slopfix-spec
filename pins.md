@@ -16,12 +16,6 @@ The URL is read in every kind of file. A document, a source file and a workflow 
 
 The finding carries these fields.
 
-- `Line` is the line of the URL, counted from one.
-- `ID` is `pins/download-version`.
-- `Rule` is `a dl.pazer.build URL pins a release with v=`.
-- `Detail` is the matched text, starting at `dl.pazer.build/`.
-- `Fix` is `Drop the v parameter. The URL then serves the newest build on the default branch, and branch= names another branch`.
-
 Every pinned URL on a line is its own finding.
 
 ## What is not flagged
@@ -41,13 +35,13 @@ An empty path is not a test.
 `unpinned` has routes.
 
 - The standard route builds the query with `net/url`. It deletes the `v` key and every value of it, and writes the query back with `Encode`. `Encode` sorts the keys by name, so the other parameters come out in key order. The scheme prefix is trimmed again. The fragment stays.
-- The textual route runs when the raw query holds `$`, `{` or `}`, or the raw text holds `&amp;`. `Encode` will escape a template such as `${OS}`. It will write `&` where the text held `&amp;`. `textually` therefore cuts the `v` field from the raw text with `querySeparator`, which matches `&amp;` or `&`. It keeps every other byte and the separators as written. A field is the `v` field when its key, unescaped, is `v`. If no `?` is in the raw URL, no edit is made. If nothing changes, no edit is made.
+- `Encode` will escape a template such as `${OS}`. It will write `&` where the text held `&amp;`. `textually` therefore cuts the `v` field from the raw text with `querySeparator`, which matches `&amp;` or `&`. It keeps every other byte and the separators as written. A field is the `v` field when its key, unescaped, is `v`. If no `?` is in the raw URL, no edit is made. If nothing changes, no edit is made.
 
 When the last parameter goes, the `?` goes too. A URL such as `https://dl.pazer.build/a#top` becomes `https://dl.pazer.build/a#top`.
 
-Worked examples of the standard route, from `pins/testdata/repair.urls`: a query with `v`, `os` and `arch` becomes the query `arch` then `os`. A query with multiple `v` keys loses both.
+A query with multiple `v` keys loses both.
 
-Worked examples of the textual route, from `pins/testdata/mangle.urls`: a URL with `${OS}`, `${V}` and `${ARCH}` keeps the order of the remaining fields. An HTML-escaped separator survives. A URL whose `v` value is a workflow expression loses the whole query.
+An HTML-escaped separator survives. A URL whose `v` value is a workflow expression loses the whole query.
 
 ## The gate
 
@@ -55,7 +49,7 @@ Worked examples of the textual route, from `pins/testdata/mangle.urls`: a URL wi
 
 ## Registration
 
-The fixer label `pins/download-version`, family `pins`, rule `pins/download-version`, and `Place` `1000`. It reads `fixer.Source`, `fixer.Document` and `fixer.Workflow` files, so it runs on every kind of file. It calls `ApplyThrough(Gate, Edits(text))`, and it skips a test path.
+The fixer label `pins/download-version`, family `pins`, rule `pins/download-version`, and `Place` `1000`. It calls `ApplyThrough(Gate, Edits(text))`, and it skips a test path.
 
 `pins.AllIDs` is the set of the rule id. `AllIDs()` in `slopfix.go` unions it with the workflow and STE ids.
 

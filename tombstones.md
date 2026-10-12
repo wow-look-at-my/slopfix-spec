@@ -11,7 +11,7 @@ The hook entry in `hooks.go` runs `slopfix hook --only tombstones --max-comment-
 Only prose is judged (`AddedBlocks` in `tombstones/comments.go`). A block is a `Block` with its text, the lines that weigh against the cap, and the zero-based line numbers. The zero-based line also is a purity flag for each line, an optional list prefix, and `Prose`. `Prose` is the text with every byte outside a comment blanked.
 
 - Source: `code.Runs` returns each comment run from a tree-sitter parse. A path no grammar parses, or a file whose parse has an error, yields no block. A string literal that holds `previously` is code and is never judged. `Block.Lines` counts the lines of the run that are comment alone and are not a directive (`treecomments.IsDirective`). A line that shares its row with code is not pure. A run of generator directives therefore never reaches the volume cap.
-- Documents: `IsDocument` is true for a path with the extension `.md`, `.markdown`, `.rst`, `.txt` or `.adoc`. It is false under a `testdata` directory and for a path `treecomments.HashComments` names as hash-comment code, such as a `CMakeLists.txt`. `paragraphs` takes the prose blocks that `markdown.Split` returns. A fence, a heading, a quotation, HTML, frontmatter and indented code are not prose. `blankInlineCode` blanks each backtick span, so a phrase inside a span is a literal and never a claim. Every line of a paragraph is pure. `Prefix` holds the indentation and list marker that open the paragraph. A rewrite writes it back so a nested item stays in its list.
+- It is false under a `testdata` directory and for a path `treecomments.HashComments` names as hash-comment code, such as a `CMakeLists.txt`. `paragraphs` takes the prose blocks that `markdown.Split` returns. A fence, a heading, a quotation, HTML, frontmatter and indented code are not prose. `blankInlineCode` blanks each backtick span, so a phrase inside a span is a literal and never a claim. Every line of a paragraph is pure. `Prefix` holds the indentation and list marker that open the paragraph. A rewrite writes it back so a nested item stays in its list.
 - Borrowed text: `Borrowed` is true. This holds for a path under a `vendor` or `node_modules` directory, and for a path that `.gitattributes` marks with `linguist-vendored` or `linguist-generated` (`commentfix.BorrowedAttributes`, read through `git check-attr` and cached for each absolute path). `exempt` in `fix.go` adds `commentfix.IsGenerated`. No rule reads or rewrites such a file. `TestAPathMarkedVendoredIsBorrowed` in `tombstones/vendored_test.go` proves that a repair leaves it unchanged.
 
 The input may be a fragment, so a scanner that starts mid-string can read code as a comment. That costs a false finding at worst.
@@ -22,16 +22,7 @@ A wording rule is an entry of `english/english.xml` with an `id`. Each entry cut
 
 It gives the fix text `Cut the phrase. slopfix fix does this.` The autofix applies every entry of the ID. Every entry carries `where="comment document"`, so each applies to a source comment and to a document paragraph. The worked examples in the table are the tests of each entry.
 
-- `tombstones/date`: an ISO date, `YYYY-MM-DD` with a year in `19xx` or `20xx`, with the word `on`, `as of` or `since` in front of it. A date inside parentheses goes with them, as in `status (2026-07-21): file I/O works` becoming `status: file I/O works`. A date that opens a parenthesis with a separator after it. Or ends one with a separator before it, goes alone and leaves the parentheses balanced. Any other bare date goes. A copyright year or year range after `copyright`, with an optional `(c)` or the copyright sign, is cut on purpose, and the holder stays. `Copyright 2019-2026 The Go Authors.` becomes `Copyright The Go Authors.`
-- `tombstones/change-reference`: `pr`, `pull request`, `issue`, `ticket` or `commit`, an optional `#` and digits, with an optional leading `see` and optional parentheses.
-- `tombstones/then-and-now-contrast`: `instead of` and an optional `the`, then `old`, `former`, `previous` or `legacy` and the next word.
-- `tombstones/position-reference`: `as mentioned`, `as noted` or `as described` before `above` or `below`, and `see above` or `see below` with the rest of the sentence.
-- `tombstones/hedged-time`: `for now`, `currently`, and `will be` followed later in the sentence by `later`, `soon`, `eventually`, `someday` or `in a future`/`in the future`, with the rest of the sentence.
-- `tombstones/unstated-value`: `is TBD` or `is to be determined`, replaced with ` has no set value`.
-- `tombstones/shrug`: `for some reason`, `do not ask why` or `do not ask how` with the rest of the sentence, and `obviously`.
-- `tombstones/unexplained-workaround`: `a hack around` becomes `a workaround for`, and `a magic number` becomes `a constant`.
-
-An entry with no `id` still rewrites when the table is applied to a comment or a paragraph. However, it names no rule, so no report or `--only` selector reaches it. The unnamed entries in the same section of the table cover the same ground: other forms of `old`, `previous` and `legacy`. A change verb with a source or an agent (`moved from`, `we removed`, `this replaces`, `was renamed`), the words `previously`, `formerly`, `originally`, `anymore`, `nowadays`, and the voice of a review (`this PR`, `per the review`, `as requested`, `negative control`, `we ran`, `to be clear`). The entries that read `the owner said` and `per the owner` apply to comments only, because a document such as a `CLAUDE.md` states rules about what the user says.
+An entry with no `id` still rewrites when the table is applied to a comment or a paragraph. However, it names no rule, so no report or `--only` selector reaches it. The entries that read `the owner said` and `per the owner` apply to comments only, because a document such as a `CLAUDE.md` states rules about what the user says.
 
 A cut never removes a negation while the words it negates stay. The words `no longer` are therefore absent from the table, and so are `original` and `former` alone. This is because each is a noun as frequently as an adjective. An entry with a `subject` attribute (`preceding` or `matched`) rewrites only when the subject of the clause fits that reading. A change verb inside a subordinate clause is left alone.
 
@@ -41,14 +32,12 @@ A cut never removes a negation while the words it negates stay. The words `no lo
 
 - Source: `rewriteComments` runs `commentfix.Tighten` on every block whose lines are all pure (`pureSpan`). A block with a line shared with code is never rewritten, because the rewrite will carry the code. The block is replaced as lines and the replacement is reflowed onto the block's own marker at the column `wrapWidth` (`78` in `commentfix`). A comment that was only a tombstone is deleted whole: `// This used to read the flag.` above a function leaves the function alone (`TestAWordingTellIsRewrittenOutOfSource`).
 - Documents: `rewriteParagraphs` skips a paragraph that holds a backtick. Otherwise it joins the paragraph body, runs `english.FixN(body, english.Document)`, and writes the result back as a single line with the same `Prefix`. A paragraph left with no letter or digit is deleted (`hasWord`).
-- A rewrite that a gate refuses is not lost. In a document each refused edit yields a finding through `wordingHits` for every wording rule whose phrase the edit span still holds. In source, `phraseCuts` cuts the phrase from each remaining pure comment line with `commentfix.RewriteLineProse` and `cutTombstones`, and `phraseHits` reports any phrase still present. A scope can hold some lines of a block and not others. This is the case it serves.
+- A rewrite that a gate refuses is not lost. In a document each refused edit yields a finding through `wordingHits` for every wording rule whose phrase the edit span still holds. A scope can hold some lines of a block and not others. This is the case it serves.
 - The findings carry the tell `a phrase about a state the code has left` and the line number counted from one.
 
 ## tombstones/name-nothing-in-the-repository-defines
 
-The ID is `IDDeadReferent`. `ruleID` builds it from the tell `a name nothing in the repository defines` (constant `deadReferent`). Lowercase, a leading `a `, `an ` or `the ` removed, each space turned into a hyphen, and the prefix `tombstones/` added. This rule reads no wording. A comment that names a symbol found nowhere in the repository describes a tree that is gone, as in a pointer to a deleted test. Its finding detail is the name.
-
-The fix text is `Cut the sentence that names it. slopfix fix does this.` The rule registers multiple cases: a Go doc comment naming `parseLegacyFlag`, and a JSDoc closer line.
+The ID is `IDDeadReferent`. `ruleID` builds it from the tell `a name nothing in the repository defines` (constant `deadReferent`). This rule reads no wording. A comment that names a symbol found nowhere in the repository describes a tree that is gone, as in a pointer to a deleted test. Its finding detail is the name.
 
 ### Candidates
 
@@ -63,7 +52,7 @@ In a document, `documentName` first trims underscores from both ends of the word
 A name is dropped before any search when:
 
 - the added text holds it more than once, because the text says where else it sits.
-- `foreignInGo` is true: the path ends in `.go`. The name has an underscore. The name does not start with `Test`, `Benchmark`, `Example` or `Fuzz`, so a C name. Otherwise, a kernel field in a Go comment is not judged.
+- `foreignInGo` is true: the path ends in `.go`. The name has an underscore. Otherwise, a kernel field in a Go comment is not judged.
 - `namesAFile` is true: a word of a path that `git ls-files --cached --others --exclude-standard` lists spells the name. Otherwise, the name ends in an underscore and starts a word of such a path.
 
 The rule answers nothing, and so reports nothing. This happens when the path is outside every work tree (`RepoRoot` walks up to a `.git` directory or file), when the blocks name no candidate, or when they name more than `maxNames`. Which is `40`. An absent answer never reads as a missing symbol.
@@ -103,7 +92,7 @@ The ID is `IDVolume`, with the value `tombstones/comment-volume`. It counts the 
 The repair is `capEdits`. It cuts from the end of the run, the way `comments/length` cuts.
 
 - A block of comment lines alone (`pureSpan`) goes through `commentfix.CapLines`. This cuts the run from its end until at most the cap of its lines are prose. This is a block with no sentence end to cut at keeps its opening sentence. The block is repaired to a sentence of at most the STE cap, and nothing after it (`TestAVolumeCapWithNoSentenceEndKeepsItsOpening`). A block of sentences loses whole sentences from its end (`TestTheVolumeCapCutsWholeSentences`). A block comment keeps a balanced opener and closer (`TestTheVolumeCapDropsLinesToASentenceEnd`).
-- A block that shares a line with code drops its last pure prose lines instead, because a line edit there will carry the code. If the last kept line does not end a sentence, `trimLastKeptLine` cuts it back to its last `.`, `!` or `?`. That line keeps a block closer that followed. If it holds no sentence end, `dropLastKept` drops lines from the end until a kept line ends a sentence. A block with no such line keeps its prose, and no finding names it (`cuttable`).
+- A block that shares a line with code drops its last pure prose lines instead, because a line edit there will carry the code. That line keeps a block closer that followed. If it holds no sentence end, `dropLastKept` drops lines from the end until a kept line ends a sentence. A block with no such line keeps its prose, and no finding names it (`cuttable`).
 
 `repairFile` notes the hit with the fix text `Cut the run from its end down to the cap. slopfix fix does this.`, but only when `cuttable` is true. This happens when the cap cut falls outside the scope a run may write. A removal made by the cap is recorded once as `comment prose past the volume cap`.
 
