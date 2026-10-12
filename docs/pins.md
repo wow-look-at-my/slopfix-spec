@@ -57,6 +57,7 @@ Worked examples of the textual route, from `pins/testdata/mangle.urls`: a URL wi
 
 The fixer label `pins/download-version`, family `pins`, rule `pins/download-version`, and `Place` `1000`. It reads `fixer.Source`, `fixer.Document` and `fixer.Workflow` files, so it runs on every kind of file. It calls `ApplyThrough(Gate, Edits(text))`, and it skips a test path.
 
+
 `pins.AllIDs` is the set of the rule id. `AllIDs()` in `slopfix.go` unions it with the workflow and STE ids.
 
 ## Tests

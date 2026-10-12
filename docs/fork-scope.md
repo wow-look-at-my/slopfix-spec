@@ -33,6 +33,7 @@ What the list, the API and the fetch said is kept in `slopfix-fork.json` in the 
 - The write hook judges the text as it will land. A repair lands only on a line that differs from the base once the write lands. An edit to an inherited line that `slopfix fix` will repair is not refused, because `slopfix fix` leaves that line alone.
 - `commentfix.FixTree`, which go-toolchain runs on every build, keeps to the fork's lines the same way.
 
+
 A change is a run of lines a line diff pairs up. It lands when the fork wrote every line it replaces. A run of new lines lands when the fork wrote a line beside it. A fork whose base cannot be read writes nothing: the run fails, and the hook refuses the write.
 
 ## See also
