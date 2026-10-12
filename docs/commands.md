@@ -1,4 +1,4 @@
-# Commands
+# commands: the slopfix commands
 
 The commands are `check`, `hook`, `lsp`, `completion` and `help`. A kind of check is a rule category or a hook guard, not a command of its own.
 
@@ -88,3 +88,9 @@ With a selector, `check` exits nonzero when a selected finding remains and zero 
 - The `write` guard repairs the text a Write, Edit or MultiEdit adds and lets the write through. It flags what the repair did not reach.
 - The write guard repairs an Edit where it lands in the file. A line inside a fence therefore stays code. A `Scope` holds every rewrite inside the edit's own bytes, so a repair the file needs elsewhere never lands. The hook reports those findings instead.
 - The hook prints nothing and exits 0 for anything it does not judge. That covers a bad payload, an event no guard serves, and clean text.
+
+## See also
+
+- [rules](rules.md) for the rule IDs `--only` accepts
+- [hook-guards](hook-guards.md) for the guards of each event
+- [fork-scope](fork-scope.md) for how a selector and the fork scope combine

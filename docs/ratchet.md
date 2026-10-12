@@ -1,4 +1,4 @@
-# ratchet
+# ratchet: the default branch judges a branch
 
 The default branch judgs a branch. On CI, slopfix checks out the default branch, reads the command its `.github/ratchet` names there. And runs that command from the default branch's checkout with this branch's checkout as its last argument. A non-zero exit fails the build.
 
@@ -27,3 +27,8 @@ That is what holds a branch to the guarantee. A rule it drops, a cap it loosens.
 | `cmd/ratchet/main.go` | the judge's entry point, named by `.github/ratchet` |
 | `cmd/ratchet.go` | the `ratchet` command that runs the runner |
 | `.github/ratchet` | this repository's entry point: `go run ./cmd/ratchet` |
+
+## See also
+
+- [ci-action](ci-action.md) for the workflow step that runs the ratchet
+- [rules](rules.md) for the repair guarantee the judge holds

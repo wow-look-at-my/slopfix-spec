@@ -17,3 +17,8 @@ The all-builds wording is the operator's own. It must not be softened. A job tha
 Unparseable YAML yields no all-builds finding, because the runner fails on it anyway. A job name that holds an expression is skipped. A matrix suffix and a reusable workflow's path parts are stripped. A segment must then match exactly. A step that only runs a command is not a test. An error annotation alone is a report.
 
 Every repair works on whole lines and never reflows.
+
+## See also
+
+- [rules](rules.md) for the `yaml` IDs in the rule table
+- [repo-what-a-repository-keeps](repo-what-a-repository-keeps.md) for the other rules that judge a repository

@@ -1,4 +1,4 @@
-# ste: Simplified Technical English
+# ste-simplified-technical-english: the Simplified Technical English rules
 
 ASD-STE100 is a controlled language. Each approved word has a single meaning and part of speech. Its rules keep each sentence to a single reading. STE governs prose. It applies to a comment or a commit message as much as a document. The text that reaches `Check` is already a block joined to a single line.
 
@@ -45,3 +45,10 @@ What `ste` does not flag:
 - `ste/count` exempts arithmetic, such as a range or an expression. It exempts no noun, because a duration or a size goes stale too.
 - The literal shapes `issue #<digits>`, `Vega <digits>`, `8 bits`, `16 bits`, `32 bits` and `64 bits` are not counts. A number that picks an item from a list, as in `gate 5`, is a count.
 - A cut keeps the sentence English. `over` and `above` always stay, so `over 32 banks` becomes `over many banks`. A capital moves only at the start of a sentence.
+
+## See also
+
+- [counts](counts.md) for the repair of `ste/count`
+- [comments](comments.md) for the rule's comment form
+- [markdown](markdown.md) for the paragraph cap the division reads
+- [syntax](syntax.md) for the parser the sentence rules read

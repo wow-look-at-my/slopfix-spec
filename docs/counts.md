@@ -45,7 +45,7 @@ A quantity with no frame is ordinary prose and is not reported. The sentence `Sp
 
 ### The merge gate's twin: ste/count
 
-`Gate` reads the same document with `cardinal.Gate`: no frame and the `gate` word class (`two` to `twelve`). This also covers the pattern `gateQuantity`, and the exemptions `InExpression`, `FunctionWordGap`, `AfterAnArticle`, `ChoiceAmongASet`, `StatusCode`, `Labeled`, `SectionCite`, `IssueNumber`, `GPUName`, `WordSize`, `NoPluralNounAfter` and `Measure`. Its rule ID is `ste.IDStaleCount`, and `ste/ste-simplified-technical-english.md` holds its detection. This file covers its repair, because the repair is shared. In `Check` in `slopfix.go`, a gate finding with the same detail as an inventory finding in the same block is dropped. One phrase is reported once.
+`Gate` reads the same document with `cardinal.Gate`: no frame and the `gate` word class (`two` to `twelve`). This also covers the pattern `gateQuantity`, and the exemptions `InExpression`, `FunctionWordGap`, `AfterAnArticle`, `ChoiceAmongASet`, `StatusCode`, `Labeled`, `SectionCite`, `IssueNumber`, `GPUName`, `WordSize`, `NoPluralNounAfter` and `Measure`. Its rule ID is `ste.IDStaleCount`, and [ste](ste-simplified-technical-english.md) holds its detection. This file covers its repair, because the repair is shared. In `Check` in `slopfix.go`, a gate finding with the same detail as an inventory finding in the same block is dropped. One phrase is reported once.
 
 ### Repair order
 
@@ -168,3 +168,10 @@ The §9 trigger fires. §9.2 holds it, and §1 asks it.
 becomes a text whose citations read `[§owning-renderer](#9-owning-the-renderer)`, `[§cap](#92-the-cap)` and `[§question](#1-the-question)`. The prose rules read the link as the citation it replaced, which carries no number word.
 
 A link written by this rule and a heading with a new slug: `[§old-name](#9-owning-the-renderer)` becomes `[§owning-renderer](#9-owning-the-renderer)`. The anchor stays, and only the slug changes.
+
+## See also
+
+- [cardinal](cardinal.md) for which number is a count
+- [inventory-list](inventory-list.md) for the enumeration rule beside the count rule
+- [ste-simplified-technical-english](ste-simplified-technical-english.md) for the merge gate's twin, `ste/count`
+- [markdown](markdown.md) for the prose blocks the rules read
