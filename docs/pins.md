@@ -62,3 +62,8 @@ The fixer label `pins/download-version`, family `pins`, rule `pins/download-vers
 ## Tests
 
 The fixtures live in `pins/testdata`, which the walk skips, so this repository's own check does not report them. `detect.urls` has one pinned URL per line. `twice.urls` has two on one line. `repair.urls` and `mangle.urls` hold an input and its repair on each line, split by a tab. `fetch.sh` and `fetch.fixed.sh` hold a whole script and its repair. The test `TestGateRefusesAnyOtherEdit` shows that an edit outside the URL rewrite is refused.
+
+## See also
+
+- [rules](rules.md) for the rule table and the fixer places
+- [edit-the-only-way-a-repair-writes](edit-the-only-way-a-repair-writes.md) for the gate contract

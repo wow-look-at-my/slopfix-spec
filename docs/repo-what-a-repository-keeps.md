@@ -16,3 +16,8 @@ The document rules walk what the other repository rules walk, so `testdata`, `no
 A body that `AGENTS.md` already holds is not appended again. The import line is never copied into the file it imports. A `CLAUDE.md` that is a symlink stays.
 
 Every other markdown file is left alone. The budget covers only the files that every request loads.
+
+## See also
+
+- [rules](rules.md) for the `repo` IDs in the rule table
+- [yaml-workflow-and-action-manifest-rules](yaml-workflow-and-action-manifest-rules.md) for the rules that judge a workflow

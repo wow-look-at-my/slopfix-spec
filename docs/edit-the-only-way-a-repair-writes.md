@@ -40,3 +40,9 @@ Inline constructs are nodes. A code span, a link, an emphasis span, an autolink,
 Each gate enforces this inside a prose block too, not only around it. `markdown.Apply` and `treecomments.Apply` parse the text before and after the splice with the same parser. Every inline node keeps its exact bytes and its order. The splice adds no unmatched backtick, bracket or emphasis marker. An edit that fails is refused.
 
 A refused edit is a bug in the repair that wrote it. The repair is fixed to edit the tree, so that it passes the gate. A refusal is never left as a finding, exempted, allowlisted, or retried as plain text.
+
+## See also
+
+- [markdown](markdown.md) for the document gate
+- [comments](comments.md) for the comment gate
+- [rules](rules.md) for the fixer places and `slopfix-expect`

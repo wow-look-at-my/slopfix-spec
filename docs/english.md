@@ -145,3 +145,9 @@ The files `rules/english-*.xml` are embedded with the rest of `rules/` through `
 Each file names its target in the `for` attribute of its root. The files `english-classes.xml` and `english-frames.xml` have `for="numbers"`. The files `english-concise.xml`, `english-filler.xml`, `english-message.xml`, `english-pattern.xml`, `english-sentence.xml` and `english-vague.xml` have `for="english"`. They use the vocabulary of `rules/rules.xsd`, where an entry has an `id` and a child `<test in= out=/>`. A pattern writes `to=` and not `replace=`. The schema of `english.xml` is separate, because the repair reads the tables through different code.
 
 A change aimed at the incorrect table compiles and does nothing. Trace from the function that a test calls before adding an entry.
+
+## See also
+
+- [tombstones](tombstones.md) for the wording rules this table carries
+- [markdown](markdown.md) for the prose blocks the rule reads
+- [rules](rules.md) for the rule table and the fixer places

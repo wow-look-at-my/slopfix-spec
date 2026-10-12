@@ -234,3 +234,10 @@ A sentence the rule cannot divide stays, and the finding asks for a rewrite by h
 - `treecomments/` holds the comment finder, the CMake and YAML readers, and the edit gate `treecomments.Apply`.
 - `code/` holds the grammar registry `code.grammars`, `code.IsComment` and the parse.
 - `rules/comment-clauses.xml` and `rules/comment-tails.xml` hold the clause and tail vocabulary with their tests.
+
+## See also
+
+- [cardinal](cardinal.md) for the `Comment` substrate the number rule reads
+- [edit-the-only-way-a-repair-writes](edit-the-only-way-a-repair-writes.md) for the comment gate
+- [ste-simplified-technical-english](ste-simplified-technical-english.md) for the sentence rule's shared form
+- [rules](rules.md) for the rule table and the fixer places

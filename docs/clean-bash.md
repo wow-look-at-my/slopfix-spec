@@ -1,4 +1,4 @@
-# clean-bash
+# clean-bash: the Bash rewriter
 
 `clean-bash` rewrites a Bash command wherever a rewrite exists, and denies it only where none does. The package is `bashclean/`. `bashclean.Run` in `bashclean/run.go` is the hook entry point and `bashclean.Transform` in `bashclean/clean.go` is the rewriter.
 
@@ -336,3 +336,10 @@ Every denial is returned as `Result{Command, Denied: true, Reason}` with `Reason
 | `toolchain_capture` | `capturesGoToolchain` | any command or process substitution |
 
 `perlName` matches `perl`, `perl5`, `perl5.36` and their wrapped forms (`command perl`, `\perl`, `/usr/bin/perl`). `perlcritic` and a `perl` argument to another program are not matched. A `shred`-like name such as `shredder` is a different command.
+
+## See also
+
+- [auto-allow](auto-allow.md) for the guard that judges the rewritten command
+- [no-work-loss](no-work-loss.md) for the guard that sees the original command
+- [hook-guards](hook-guards.md) for the guard table
+- [commands](commands.md) for the `hook` command and its event table
