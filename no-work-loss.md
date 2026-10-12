@@ -44,7 +44,61 @@ A ref-destroying verb asks whether the content exists anywhere else:
 - `refs/remotes/<remote>/HEAD` aliases the overwritten branch. The check filters it out.
 - `push --mirror` is always refused. A push with no local remote-tracking ref denies and names `git fetch`.
 
-Allowed on purpose: unpushed commits on a clean tree, `checkout -b`, `switch -c`, `stash push`, `stash pop`, `stash apply`, `commit`, `add`, `restore --staged`, unknown verbs, appends, and anything outside a repository.
+Allowed on purpose: `checkout -b`, `switch -c`, `stash pop`, `stash apply`, `commit`, `add`, `restore --staged`, unknown verbs, appends, and anything outside a repository. For unpushed commits, `stash push` and `worktree add`, see Found work.
+
+## Found work
+
+The invariant: work the session finds that exists only on this machine is on a remote before the session moves on. Found work is never routed around, set aside or left for later. The guard refuses nothing here. It commits and pushes the found work itself, then lets the command run.
+
+### What is found work
+
+A repository holds found work when any of these is true, read with `status --porcelain=v2 --branch` and `rev-list`:
+
+- a tracked file differs from the index or the index from HEAD.
+- an untracked file that git does not ignore exists.
+- a submodule, at any depth, holds found work of its own.
+- the branch has commits that no remote-tracking ref contains.
+
+A linked worktree is a repository of its own here. Its found work is judged in it, not in the checkout it was added from.
+
+### Which repositories the guard judges
+
+The guard records each repository the session touches, the first time it is touched, in a state file for that session:
+
+- PreToolUse on Bash. The repository of the working directory, of each `cd`, `git -C`, `--work-tree` and `GIT_DIR`, and of each path operand, resolved the same way Detection resolves them.
+- PostToolUse on Read, Edit, Write, MultiEdit, NotebookEdit, Grep and Glob: the repository that holds each path the tool named.
+
+Each recorded repository is probed on every PreToolUse and Stop. Its submodules are probed with it. No environment variable, flag, file or path turns the recording or the probe off.
+
+### When it commits and pushes
+
+The guard commits and pushes the found work of every recorded repository at these points, before the hook answers:
+
+- before `git worktree add` from that repository, because a new worktree beside the work sets it aside.
+- before `git stash` in any form that stores, because a stash hides the work. The stash then runs on a clean tree and stores nothing.
+- before `git clone` of that repository or its remote, and before `cp -r`, `rsync` or `ditto` of its directory, because a fresh copy leaves the work behind.
+- at Stop, for every recorded repository, because a turn that ends leaves the work where it found it.
+- at PostToolUse on Bash, for a repository whose found work the command's output showed, such as a `git status` that listed it. Seeing the work finds it.
+
+The commit and push use the Destruction machinery. This covers a throwaway `GIT_INDEX_FILE`, every path at risk committed onto the current branch, `update-ref`, a refresh of the real index, then `git push`. Git hooks run on the push, so the pre-push checks still judge it. A submodule is committed and pushed before its parent, and the parent's commit then records the pushed gitlink. On the remote's default branch the guard first creates a branch named for the session and commits there. This is because the default branch takes no direct push.
+
+A branch with no upstream is pushed with one set.
+
+The work found is committed whoever wrote it: another session, an agent, a hook, or this session. The commit message names the guard and the paths.
+
+When a commit or push cannot complete (no remote, a rejected push, a git error), the hook answers with the reason and the exact commands that finish the job. That commit is for the agent to run next. It never suggests a stash, a worktree, a reset, a clone or a discard. At Stop that answer refuses the stop, because the work is not yet on a remote.
+
+### Worktrees keep working
+
+The guard must not cost a working worktree flow:
+
+- `git worktree add` from a repository that holds no found work passes unchanged, at any path and with any branch. From a repository that holds found work, it runs after the commit and push above.
+- Before a `git worktree add` whose path lies inside the repository, such as `<repo>/.claude/worktrees/<branch>`, the guard appends the path's top directory pattern to `$(git rev-parse --git-common-dir)/info/exclude`. This happens when no line there already ignores it. For that layout the pattern is `/.claude/worktrees/`. A worktree inside its repository is therefore never untracked content of the repository, and a `git add .` never records it.
+- The guard judges a worktree as its own repository: its work is committed and pushed in it, on its own branch.
+
+### The embedded repository
+
+A `git add` that will record a gitlink for a path `.gitmodules` does not list is rewritten. The guard adds the path to `info/exclude`. The guard drops it from the add, then commits and pushes the embedded repository's own found work in that repository. The parent never records a gitlink nobody declared, and the work inside still reaches a remote.
 
 ## Detection
 
