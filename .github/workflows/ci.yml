@@ -13,8 +13,8 @@ permissions:
   contents: read
 
 jobs:
-  index:
+  slopfix:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: bash .github/scripts/check-index.sh
+      - uses: wow-look-at-my/slopfix@master
