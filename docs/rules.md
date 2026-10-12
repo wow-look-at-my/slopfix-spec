@@ -107,6 +107,7 @@ A finding is an error unless its rule is in `ste.WarningIDs` or `workflow.Warnin
 | `yaml` | `yaml/push-tags` | error |
 | `yaml` | `yaml/org-action-ref` | error |
 | `yaml` | `yaml/concurrency` | error |
+| `yaml` | `yaml/private-runner` | error |
 | `yaml` | `yaml/test-in-workflow` | warning |
 | `pins` | `pins/download-version` | error |
 | `laziness` | `laziness/punt` | error |
