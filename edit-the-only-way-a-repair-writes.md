@@ -30,3 +30,13 @@ The repository rules sit outside the registry. They delete or move whole files, 
 `edit.Scope` bounds where an edit may land, and follows the text through each pass. The hook passes the span its edit writes. `edit.Nowhere()` admits nothing, for a run that wants findings alone.
 
 The string match left is the hook replaying an Edit payload. `old_string` is a literal by the tool's own contract, so the hook finds it the way the tool will.
+
+## A repair edits the tree, never the raw text
+
+A repair changes a document only through the parsed model of that document. That is the CommonMark tree for markdown, the tree-sitter tree for a comment, and the YAML tree for a workflow. No repair rewrites text with string operations, regular expressions, or byte offsets read from a masked copy of the text.
+
+Inline constructs are nodes. A code span, a link, an emphasis span, an autolink, a quotation and an HTML entity each move or stay whole. A repair never cuts through one, and never splits one across sentences or paragraphs, and never reorders its delimiters.
+
+Each gate enforces this inside a prose block too, not only around it. `markdown.Apply` and `treecomments.Apply` parse the text before and after the splice with the same parser. Every inline node keeps its exact bytes and its order. The splice adds no unmatched backtick, bracket or emphasis marker. An edit that fails is refused.
+
+A refused edit is a bug in the repair that wrote it. The repair is fixed to edit the tree, so that it passes the gate. A refusal is never left as a finding, exempted, allowlisted, or retried as plain text.
