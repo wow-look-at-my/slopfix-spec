@@ -1,4 +1,4 @@
-# ci-action
+# ci-action: the composite action and the CI workflow
 
 slopfix ships a composite GitHub Action at the repository root (`action.yml`). Its own workflow (`.github/workflows/ci.yml`) builds the binary, checks the tree, runs the ratchet, runs the action. And on the default branch asks cc-marketplace to package the build.
 
@@ -67,7 +67,7 @@ The workflow has one job, `build`, on `ubuntu-latest`. It must not be named `all
 2. `Install the dats sandbox backend`. It runs `apt-get update`, `apt-get install -y bubblewrap`, and `sysctl -w kernel.apparmor_restrict_unprivileged_userns=0`. go-toolchain runs the `dats/` suites after the build, and `dats` needs a sandbox backend. Otherwise, the suites run on the runner itself.
 3. `wow-look-at-my/go-toolchain@master` with `generate: 165003bec91c`. The input approves the `//go:generate` directives, and editing a single directive fails the build with the new value. The step builds `build/slopfix`, runs the tests with the coverage gate, and runs the `dats/` suites.
 4. `./build/slopfix check .` with `GITHUB_TOKEN` set to `${{ github.token }}`. The fork check reads the repository from the API, and an anonymous call shares the runner IP's rate limit.
-5. `./build/slopfix ratchet`. The ratchet judges this branch by the default branch's guarantee. It reads the default branch's `.github/ratchet`. A branch cannot change what judges it. [ratchet.md](ratchet.md) holds the detail.
+5. `./build/slopfix ratchet`. The ratchet judges this branch by the default branch's guarantee. It reads the default branch's `.github/ratchet`. A branch cannot change what judges it. [ratchet](ratchet.md) holds the detail.
 6. `uses: ./` with `permission: contents`. This runs the action at the root, so a break in the action fails its own repository first. The action takes no input, so `permission: contents` is not read by it.
 7. `Ship this build in the marketplace`, described below.
 
@@ -99,3 +99,8 @@ The last step is:
 | `action_test.go` | the three tests that hold the action: no inputs, `sh` on Unix, one claim per run |
 | `.github/workflows/ci.yml` | the build, the tree check, the ratchet, the action run and the marketplace ship |
 | `.github/ratchet` | the ratchet entry point: `go run ./cmd/ratchet` |
+
+## See also
+
+- [ratchet](ratchet.md) for what the ratchet step judges
+- [commands](commands.md) for the commands the action shells out to

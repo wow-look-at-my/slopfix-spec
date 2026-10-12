@@ -126,3 +126,9 @@ The `Comment` substrate reads tokens, not quantities. `tokensIn` splits a line i
 ## Tests
 
 `cardinal/detect_test.go` runs every case in `rules/numbers-detect.xml` against the substrate it names, from the map `prose`, `comment` and `gate`. A case with no `found` says the substrate reports nothing, which is how an exemption is written down. A new exemption therefore adds a case to the XML and edits no Go test. `cardinal_test.go` holds the vocabulary difference and the shape of a `Prose` finding.
+
+## See also
+
+- [counts](counts.md) for the `Prose` substrate
+- [comments](comments.md) for the `Comment` substrate
+- [syntax](syntax.md) for the parser the point and item tests read

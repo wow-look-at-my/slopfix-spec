@@ -109,6 +109,12 @@ The repair is `capEdits`. It cuts from the end of the run, the way `comments/len
 
 ## Scope and gates
 
-Every edit is written through `f.ApplyComments`, which holds it to the comment gate and to the `edit.Scope` of the run. In a fork, only the lines the fork wrote can fail the check (`docs/fork-scope.md`), and `blockCap` in `forkscope.go` passes the cap only for `IDVolume`. Each `Repair` returned by `FixIn` carries the text, whether it changed, the removed lines quoted, the rewrite count, the `Kept` hits that survive. The `Refused` edits. A caller refuses on `Kept`.
+Every edit is written through `f.ApplyComments`, which holds it to the comment gate and to the `edit.Scope` of the run. In a fork, only the lines the fork wrote can fail the check, and `blockCap` in `forkscope.go` passes the cap only for `IDVolume`. [fork-scope](fork-scope.md) holds the fork rule. Each `Repair` returned by `FixIn` carries the text, whether it changed, the removed lines quoted, the rewrite count, the `Kept` hits that survive. The `Refused` edits. A caller refuses on `Kept`.
 
 The tests of the package pin these behaviors: `tombstones/tombstones_test.go` for the wording repair. The list structure and the volume cap, `tombstones/scan_test.go` for blocks, `HitForName` and the dead-name search, `tombstones/referents_index_test.go` for the index, and `tombstones/vendored_test.go` for borrowed paths.
+
+## See also
+
+- [english](english.md) for the wording table this family reads
+- [fork-scope](fork-scope.md) for the fork scope the edits obey
+- [comments](comments.md) for the comment repair context

@@ -140,3 +140,9 @@ Nouns joined by a conjunction open no clause. Neither does an ambiguous subordin
 - `Tags()` writes each word as `word/TAG`.
 
 The tests in `syntax/syntax_test.go` use these to state behavior, for example that `The gate reads every file and refuses the write.` has a coordinate clause with no subject and the verb `refuses`.
+
+## See also
+
+- [ste-simplified-technical-english](ste-simplified-technical-english.md) for a caller of the parser
+- [english](english.md) for the `english/comma-never` rule that reads a verb
+- [cardinal](cardinal.md) for the point and item tests

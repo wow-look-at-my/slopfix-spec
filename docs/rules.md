@@ -1,4 +1,4 @@
-# rules
+# rules: the rule registry
 
 Every detection slopfix reports is a registered rule. A rule is one `RuleSpec` (`rule.go`) with a detection. The repair that answers it, and the worked cases that prove both. The registry refuses to start a binary that holds a rule without all three, and one common test drives every rule on every case.
 
@@ -236,3 +236,9 @@ The `expect` package marks a fixture file whose repair is stated in the file its
 - `TestTheDefaultSetIsTheWholeCheckPath` requires `common-checks` to have an empty `Only` and to select exactly `AllIDs()`.
 
 `AllIDs` (`slopfix.go`) is the set `CheckContent` reports: `workflow.AllIDs`, `ste.AllIDs`, `pins.AllIDs`, `wrap/hard-wrap`, `wrap/long-block`, the three `comments` IDs and `english.AllIDs`. It holds no repository rule and no message rule. Those reach a hook through the `ci check` entry and the message entries.
+
+## See also
+
+- [commands](commands.md) for the CLI and `--only`
+- [ratchet](ratchet.md) for the guarantee this registry is held to
+- [edit-the-only-way-a-repair-writes](edit-the-only-way-a-repair-writes.md) for the repair contract every rule answers

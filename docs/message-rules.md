@@ -1,6 +1,6 @@
-# Message rules
+# message-rules: the rules that judge a closing message
 
-Rules judge a closing message, which is never on disk: `laziness/punt`, `blame/deflection` and `ask/prose-decision`. Each is a `RuleSpec` in `rule_message_laziness.go`, `rule_message_blame.go` and `rule_message_ask.go`. The detectors live in the packages `laziness`, `blamelanguage` and `askproperly`. `message.go` joins them. The hook guards that serve the same detectors are in [hook-guards.md](hook-guards.md).
+Rules judge a closing message, which is never on disk: `laziness/punt`, `blame/deflection` and `ask/prose-decision`. Each is a `RuleSpec` in `rule_message_laziness.go`, `rule_message_blame.go` and `rule_message_ask.go`. The detectors live in the packages `laziness`, `blamelanguage` and `askproperly`. `message.go` joins them. The hook guards that serve the same detectors are in [hook-guards](hook-guards.md).
 
 ## Shared behavior
 
@@ -96,3 +96,8 @@ The slice `deferralPhrases` holds: `let me know`, `your call`, `up to you`, `say
 - A message with a finding in a fence-adjacent context is thus never cut beyond the lines the rules reported.
 
 The tests in `ruleharness_test.go` drive each rule through `messageFindings` and `messageAutofix`, which run `CheckMessage` and `FixMessage` with only that rule enabled. The case texts are in the rule_message_*.go` files.
+
+## See also
+
+- [hook-guards](hook-guards.md) for the guards that serve the same detectors
+- [rules](rules.md) for the message rules in the registry

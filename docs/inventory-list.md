@@ -4,7 +4,7 @@ An enumeration states the members of a set the code defines. The code is the onl
 
 A stated membership goes stale the same way a stated count does.
 
-The rule's hardest case in its `Cases` is the sentence that listed every slopfix command by name in the old `commands.md`.
+The rule's hardest case in its `Cases` is the sentence that listed every slopfix command by name in the old [commands](commands.md).
 
 A reader who needs the members asks the program for them, or reads the data file the code loads. Prose names the set and says what it is for. It never lists what is in it.
 
@@ -63,3 +63,8 @@ Every edit goes through `edit.Edit` with `Cut` set, and through the same documen
 - The rule's `Cases` hold the commands sentence as the hardest case. They hold a case for each shape under Detection, and a case in a comment and in a closing message.
 - `ruleharness_test.go` drives each case through the common test. `allfix_test.go` requires a clean `check` after `fix` over the tree of hardest cases.
 - `selfrepair_test.go` runs the rule over the whole repository, the spec submodule included. A hand-kept enumeration anywhere in the tree fails the build.
+
+## See also
+
+- [counts](counts.md) for the family this rule belongs to
+- [rules](rules.md) for the fixer places and the common test

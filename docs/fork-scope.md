@@ -1,4 +1,4 @@
-# A fork is checked on its own lines
+# fork-scope: a fork is checked on its own lines
 
 A fork carries its parent's tree, and the parent never agreed to these rules.
 
@@ -34,3 +34,9 @@ What the list, the API and the fetch said is kept in `slopfix-fork.json` in the 
 - `commentfix.FixTree`, which go-toolchain runs on every build, keeps to the fork's lines the same way.
 
 A change is a run of lines a line diff pairs up. It lands when the fork wrote every line it replaces. A run of new lines lands when the fork wrote a line beside it. A fork whose base cannot be read writes nothing: the run fails, and the hook refuses the write.
+
+## See also
+
+- [commands](commands.md) for the selectors that narrow a run
+- [hook-guards](hook-guards.md) for the write guard
+- [tombstones](tombstones.md) for the cap the fork scope passes

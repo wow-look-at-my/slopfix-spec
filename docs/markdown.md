@@ -72,7 +72,7 @@ A directive line divides its paragraph. In `paragraphs`, each run of lines betwe
 - An edit lies inside a single prose block. `proseSpans` gives the byte range of each prose block. An edit that reaches past the block containing its start is refused with the reason `it reaches past its prose block`.
 - After the splice, the document is parsed again. The list of verbatim blocks, from `verbatim`, must equal the list before the splice. A verbatim block that holds only blanks is not in the list. The container tree, from `shape`, must also be equal.
 
-`shape` renders the container tree with `P` for a run of paragraphs. A run of paragraphs in one container renders as a single `P`, so an edit may divide a paragraph with a blank line. A paragraph that leaves its list item changes the shape and is refused. Text that opens a fence, starts a heading or ends a list changes the verbatim list, so the edit that wrote it never lands. See `edit-the-only-way-a-repair-writes.md` for the gate contract.
+`shape` renders the container tree with `P` for a run of paragraphs. A run of paragraphs in one container renders as a single `P`, so an edit may divide a paragraph with a blank line. A paragraph that leaves its list item changes the shape and is refused. Text that opens a fence, starts a heading or ends a list changes the verbatim list, so the edit that wrote it never lands. See [edit-the-only-way-a-repair-writes](edit-the-only-way-a-repair-writes.md) for the gate contract.
 
 ## wrap/hard-wrap
 
@@ -152,3 +152,8 @@ Not flagged:
 - A verbatim block.
 
 The registered case in `rule_wrap_longblock.go` is one list item made of a repeated sentence, in `x.md`. `longblock_test.go` checks that a division moves only newlines and blanks (`WordsOnly`), that every part stays under the character cap and the word cap. This is and that no part opens with a list marker or a heading.
+
+## See also
+
+- [edit-the-only-way-a-repair-writes](edit-the-only-way-a-repair-writes.md) for the gate contract
+- [ste-simplified-technical-english](ste-simplified-technical-english.md) for the sentence cap the division reads
