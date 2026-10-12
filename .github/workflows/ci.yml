@@ -3,7 +3,6 @@ name: CI
 on:
   push:
     branches: ['**']
-  workflow_dispatch:
 
 concurrency:
   group: gha_${{ github.repository }}_${{ github.workflow }}_${{ github.ref != 'refs/heads/master' && github.ref || github.run_id }}
@@ -17,4 +16,3 @@ jobs:
     runs-on: ${{ github.event.repository.visibility == 'public' && 'ubuntu-latest' || vars.CI_RUNNER || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
-      - uses: wow-look-at-my/slopfix@master
