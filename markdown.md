@@ -4,6 +4,14 @@ The `markdown` package splits a document into blocks. A prose rule reads only a 
 
 ## Blocks
 
+A `Block` holds `Kind`, `Lines`, `Start`, `Marker` and `Indent`.
+
+- `Kind` is `Prose` or `Verbatim`. `Prose` is a paragraph or a list item. `Verbatim` is any other line.
+- `Lines` are the source lines of the block, in order, without their line endings.
+- `Start` is the line where the block begins, counting from `1`.
+- `Marker` is the list bullet or number the item opened with. It is empty for a paragraph.
+- `Indent` is the whitespace before the block.
+
 `Block.Text` renders a prose block as the single line the rules read. It trims each line, drops the marker from the first line, and skips lines that are empty after the trim. It joins the rest with one space.
 
 A verbatim block is always one line. `Split` emits one verbatim block per source line, so a fence of many lines is many verbatim blocks.
@@ -47,7 +55,7 @@ A directive line divides its paragraph. In `paragraphs`, each run of lines betwe
 
 ## List markers
 
-`listMarker` splits a line into its leading whitespace and its marker. An ordered marker is digits, then `.` or `)`, then a space, and the marker includes the digits and the punctuation. A line that opens no item returns an empty indent and an empty marker. For such a line `Split` takes the leading spaces and tabs as the indent.
+`listMarker` splits a line into its leading whitespace and its marker. A bullet is `- `, `* ` or `+ `, and the marker is the bullet character. An ordered marker is digits, then `.` or `)`, then a space, and the marker includes the digits and the punctuation. A line that opens no item returns an empty indent and an empty marker. For such a line `Split` takes the leading spaces and tabs as the indent.
 
 ## The join
 
@@ -88,6 +96,11 @@ The registered case in `rule_wrap_hardwrap.go` is a wrapped paragraph in `x.md`.
 
 `wrap/long-block` (constant `IDLongBlock`, category `RuleWrap`) rejects a paragraph or list item over the character cap. Its constants are in `longblock.go`.
 
+- `LongBlockCap` is `1500`. It is the most characters a prose block may hold.
+- `LongBlockTarget` is `LongBlockCap * 2 / 3`, which is `1000`. A division brings each part down to it.
+- `LongBlockWordCap` is `120`. It is the most words a part of a division may hold. It is the org's paragraph cap in words.
+- `LongBlockWordTarget` is `LongBlockWordCap * 2 / 3`, which is `80`.
+
 Detection is `longBlocks`. For each prose block it counts the runes of `Block.Text()` with `utf8.RuneCountInString`. A block at or under `LongBlockCap` gives no finding. A block over the cap gives a finding only if `divide` returns a couple of parts. The finding is at `block.Start`. Its rule text is `over the 1500-character cap for a paragraph or a list item at N characters`, with the real count for `N`.
 
 Its detail is the first `60` runes of the text followed by `...`. The tail `...` is added even when the text is shorter.
@@ -102,9 +115,13 @@ Every reported block can be repaired, because a finding needs a division into pa
 - Inside a quotation, toggled by `"`.
 - Inside bold text, toggled by `**`.
 - Inside square brackets, so inside the text of a link.
-- Where the text that follows matches `blockOpener`. It covers a list marker, a heading, a quotation, a fence, HTML and a table. A part therefore never opens a new block.
+- Where the text that follows matches `blockOpener`. That pattern is `^(?:[-*+]\s|\d{1,9}[.)]\s|#{1,6}\s|>|` followed by a triple backtick, `~~~`, `<` or `|`. It covers a list marker, a heading, a quotation, a fence, HTML and a table. A part therefore never opens a new block.
 
 Each cut has a class, best first.
+
+- `cutSentence`: the cut is the start of a sentence, as `ste.Sentences` splits it, and no parenthesis is open.
+- `cutInnerSentence`: the cut is the start of a sentence inside an open parenthesis.
+- `cutWord`: any other blank between words.
 
 ### Division
 

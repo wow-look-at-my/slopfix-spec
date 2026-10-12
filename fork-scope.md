@@ -8,7 +8,7 @@ When `GITHUB_REPOSITORY` is set, `check` reads the list from `ForkListURL`, a ca
 
 Only a finding on a line changed since that base fails the check. An org with no list, and a repository the list does not name, fall through to the API. A list that cannot be read or has a malformed line fails the check with the reason. So does an upstream that cannot be listed.
 
-An upstream with no tags, or none in HEAD's history, has a different base. `check` fetches the upstream's default branch without blobs. The base is the commit of that branch whose tree differs from HEAD's in the fewest paths, and the newer commit wins a tie. A fork that squashes each upstream sync shares no history with the upstream after the first sync, so the merge base predates every later sync. The closest tree is the snapshot the last sync brought in.
+An upstream with no tags, or none in HEAD's history, has a different base. `check` fetches the upstream's default branch without blobs. The base is the commit of that branch whose tree differs from HEAD's in the fewest paths, and the newer commit wins a tie. A fork that squashes each upstream sync shares no history with the upstream after the first sync, so the merge base predates every later sync. The closest tree is the snapshot the last sync brought in. The candidates are the branch's first-parent commits after the merge base, and the merge base itself.
 
 With no merge base, every commit of the branch is a candidate. A fetch that fails, or a branch with no commits, fails the check.
 
@@ -27,5 +27,11 @@ The repository is the one the work tree's `origin` names on the GitHub server, `
 What the list, the API and the fetch said is kept in `slopfix-fork.json` in the git common directory for an hour. The write hook runs on every write and asks the network once.
 
 ## Every write keeps to the fork's lines
+
+- `slopfix fix .` and `check .` skip each file the fork never touched: it is neither read nor written. In a file the fork touched, a repair lands only on a line the fork wrote. A finding counts only on such a line. A repository rule rewrites or deletes only a file the fork wrote whole, and reports the rest.
+- `slopfix fix FILE` on a file the fork never touched does nothing. On a file it touched, only the fork's lines change.
+- The write hook judges the text as it will land. A repair lands only on a line that differs from the base once the write lands. An edit to an inherited line that `slopfix fix` will repair is not refused, because `slopfix fix` leaves that line alone.
+- `commentfix.FixTree`, which go-toolchain runs on every build, keeps to the fork's lines the same way.
+
 
 A change is a run of lines a line diff pairs up. It lands when the fork wrote every line it replaces. A run of new lines lands when the fork wrote a line beside it. A fork whose base cannot be read writes nothing: the run fails, and the hook refuses the write.
