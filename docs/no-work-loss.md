@@ -142,4 +142,4 @@ It prices the evasion in Claude tokens from `transcript_path`. The price is ever
 
 - [clean-bash](clean-bash.md) for the guard that rewrites `rm`
 - [hook-guards](hook-guards.md) for the guard table
-- [auto-allow](auto-allow.md) for the guard after this one on PreToolUse
+- [auto-allow](auto-allow.md) for the guard after this on PreToolUse
