@@ -1,6 +1,6 @@
 # comments: what a comment gets wrong
 
-These rules judge the comments of a source file. The `commentfix` package holds them. The `treecomments` package finds the comments, and the `code` package parses the file. The comment form of `ste/sentence-length` lives beside them in `commentfix/sentences.go`.
+These rules judge the comments of a source file. The `commentfix` package holds them. The `treecomments` package finds the comments, and the `code` package parses the file. Each rule is a `RuleSpec` in `rule_comments_number.go`, `rule_comments_length.go` or `rule_comments_tail.go`, with category `RuleComments`. The comment form of `ste/sentence-length` lives beside them in `commentfix/sentences.go`.
 
 Every finding is an error. Every finding has a repair, and `Fix` runs the repairs until the text holds.
 
@@ -8,9 +8,19 @@ Every finding is an error. Every finding has a repair, and `Fix` runs the repair
 
 `commentfix.Supported` answers whether the number rule reads a file. It is true when `treecomments.Supported` is true, or when `treecomments.HashComments` is true.
 
-`treecomments.grammars` maps a lower-cased file extension to a tree-sitter grammar.
+`treecomments.grammars` maps a lower-cased file extension to a tree-sitter grammar. The grammar of each extension:
 
-`treecomments.HashComments` adds files whose comments open on `#` and that the table does not name. The Bash grammar reads them, and `treecomments.Extract` keeps only the comments that open their line (`wholeLineOnly`). A file with an extension in neither table has no comments to read. The reason is that a `#` opens a directive in GLSL and a selector in CSS.
+- `.go` reads with the Go grammar.
+- `.c` and `.h` read with the C grammar.
+- `.cc`, `.cpp`, `.cxx`, `.hpp` and `.hh` read with the C++ grammar.
+- `.rs` reads with the Rust grammar.
+- `.sh` and `.bash` read with the Bash grammar.
+- `.js`, `.jsx`, `.mjs` and `.cjs` read with the JavaScript grammar.
+- `.ts`, `.mts` and `.cts` read with the TypeScript grammar.
+- `.tsx` reads with the TSX grammar.
+- `.yml`, `.yaml`, `.toml`, `.conf` and `.zsh` read with the Bash grammar, which recovers the `#` comments of a hash-comment format.
+
+`treecomments.HashComments` adds files whose comments open on `#` and that the table does not name. By base name, lower-cased, they are `dockerfile`, `containerfile`, `makefile`, `justfile` and `cmakelists.txt`. By extension they are `.ini`, `.cfg`, `.dockerfile`, `.mk`, `.dats` and `.cmake`. The Bash grammar reads them, and `treecomments.Extract` keeps only the comments that open their line (`wholeLineOnly`). A file with an extension in neither table has no comments to read. The reason is that a `#` opens a directive in GLSL and a selector in CSS.
 
 The length rule and the block pairing read a narrower set. `code.grammars` has the same extensions as `treecomments.grammars` without the hash-comment extensions. `commentfix.Parsed` and `code.LanguageFor` answer from it. A file outside that set yields no length finding.
 
@@ -21,6 +31,7 @@ A grammar with no generated parse tables yields no comments. `treecomments.repor
 `treecomments.Extract` then drops:
 
 - The interpreter line that opens the file (`dropShebang`).
+- A Dockerfile parser directive, which is `syntax`, `escape` or `check` followed by `=` and a value (`dockerDirective`).
 - The comment group that cgo reads as C source, right before a standalone `import "C"` (`dropCgoPreamble`).
 - In a file named `_test.go`, an example's `Output:` or `Unordered output:` comment and each comment under it that adjoins it (`withoutExampleOutput`).
 
@@ -32,11 +43,11 @@ For a CMake file the lexer in `treecomments/cmake.go` replaces the Bash result. 
 
 - A file that `tombstones.Borrowed` names, and a file `commentfix.IsGenerated` marks. The `exempt` function in `fix.go` joins the two.
 - A generated file. The marker is a line matching `generatedLine`, which reads `Code generated`, then any text, then `DO NOT EDIT.`, behind an optional comment opener. It counts only in the header: every earlier comment must have only blank text between it and the top of the file. For a language with no grammar the marker must head the file on its own line.
-- A directive line, which addresses a tool. `treecomments.IsDirective` reads `// +build`, and a line comment with no space after the marker and a name followed by a colon, such as the `go:` forms. `commentfix.isDirectiveLine` adds a `//` or `#` line with a colon-terminated name that holds no space, the interpreter line, and a lint pragma.
-- A lint pragma (`isLintPragma`). The words after a pragma are free text a person wrote, and the length rule reads them as prose.
-- A license notice. A block with a line matching `licenseNotice` is neither measured nor repaired.
+- A directive line, which addresses a tool. `treecomments.IsDirective` reads `// +build`, and a line comment with no space after the marker and a name followed by a colon, such as the `go:` forms. It also reads the names `line`, `export`, `extern`, `sys` and `sysnb` when a space or the end follows. `commentfix.isDirectiveLine` adds a `//` or `#` line with a colon-terminated name that holds no space, the interpreter line, and a lint pragma.
+- A lint pragma (`isLintPragma`). The pragma words are `eslint-disable-next-line`, `eslint-disable-line`, `eslint-disable`, `eslint-enable`, `@ts-ignore`, `@ts-expect-error`, `@ts-nocheck` and `prettier-ignore`. The pairs `istanbul ignore` with `next`, `if`, `else` or `file`, and `c8 ignore` with `next`, `start` or `stop`, count too. So does a `shellcheck` line whose words are `disable=`, `enable=`, `source=`, `shell=` or `external-sources=` keys. The words after a pragma are free text a person wrote, and the length rule reads them as prose.
+- A license notice. A block with a line matching `licenseNotice` is neither measured nor repaired. The pattern is `copyright`, a `(c)` with a year, or `SPDX-License-Identifier`, case-insensitive.
 - A line with code in it (`codeLine`), such as a doc comment's tab-indented code block. Digits in code are no counts.
-- A file the walk skips. A path git ignores is dropped, and so is a path `.gitattributes` marks with `linguist-vendored` or `linguist-generated` (`BorrowedAttributes`).
+- A file the walk skips. `commentfix.skipDirs` holds `vendor`, `node_modules`, `testdata`, `build` and `dist`, and `MaxFileBytes` is `1 << 20`. A path git ignores is dropped, and so is a path `.gitattributes` marks with `linguist-vendored` or `linguist-generated` (`BorrowedAttributes`).
 
 ## comments/number
 
@@ -44,11 +55,35 @@ For a CMake file the lexer in `treecomments/cmake.go` replaces the Bash result. 
 
 Detection is `commentfix.Check`. It reads each run of comments, breaks the run into stanzas at every line that has a marker and no prose. It asks `cardinal.Find` with the `cardinal.Comment` substrate for each line. A number inside a quotation is skipped. A quotation can open on one line and close on a later line of the same stanza (`cardinal.QuotedSpans`). Directive lines and code lines never reach `cardinal.Find`.
 
-The `cardinal.Comment` substrate reads the shape `Number`. It needs no frame. The words `zero` and `one` are absent, because they name a value or a pronoun. A repeat count and an ordinal are absent because neither counts a set. A word joined to other letters, such as `twoPhase`, is a name.
+The `cardinal.Comment` substrate reads the shape `Number`. It needs no frame. Its vocabulary is digits, and the class `comment` of `rules/numbers-cardinal.xml`: `two` through `twenty`, `thirty` through `ninety`, `hundred`, `thousand`, `million`, `billion`, `trillion` and `dozen`. The words `zero` and `one` are absent, because they name a value or a pronoun. A repeat count and an ordinal are absent because neither counts a set. A word joined to other letters, such as `twoPhase`, is a name.
+
+The exemptions of the `Comment` substrate, all in `cardinal/walk.go` except `Quoted`:
+
+- `LabeledToken`: digits after a label word such as `http`, `migration`, `rfc`, `pr`, `issue`, `version`, `release`, `port` or `revision`.
+- `ExitStatus`: a status or exit code, including a noun between the status word and the digits.
+- `Literal`: a value the code is written against, such as an env marker, a quoted string a parser reads as unset, or a comparison operand.
+- `SectionRef`: a token behind the section sign.
+- `Money`: digits with a currency sign against them.
+- `Quoted`: a token inside a quotation.
+- `ListMarker`: the digits that open a numbered list item.
+- `Operand`: a number written as code, such as a call argument or an operand of a star or a plus.
+- `MeasureToken`: a plural noun that takes a singular verb.
+- `WordSizeToken`: a word size such as the bits of a register.
 
 The finding fix is `Say it in words, or let the reader count. slopfix fix does this.` The constant `commentfix.Remedy` carries the longer advice. Describe what the code does, and cite a section by its slug or heading text and not by its position.
 
-Repair is the fixer `FixerNumber`, whose label is `comments/number`. `repairNumbers` runs these steps on each paragraph of comment prose, in order.
+Repair is the fixer `FixerNumber`, whose label is `comments/number`. It is registered with rules `comments/number` and `comments/tail` and `Place` `30`. `repairNumbers` runs these steps on each paragraph of comment prose, in order.
+
+1. `nameLabels` rewrites each number that names an item or sets a point, through `counts.LabelAt`. A number that equals the value of a declared constant takes that constant's name. `constantsIn` finds `const`, `static`, `#define` and upper-case Go const-block lines. A value that several names share names none of them.
+2. `rewordChecked` applies the rewrite table. A step whose result adds a defect is thrown away and reported as a `Rejection` that names the entry. The defects in `guard.go` follow.
+
+- A word repeated in a row.
+- The article `a` before a vowel sound.
+- The word `each`, `every` or `a single` before a plural noun.
+- A lower-case start where the original was capitalized.
+3. `CloseProse` closes a paragraph that stops on an opening word (see `comments/tail`).
+4. `cutWhatIsLeft` rewords each number still left with `counts.RewordAt`. If a number remains, it cuts each sentence that holds one. The cut sentences go to the caller as `Repair.Removed`.
+5. The paragraph is laid out again with `wrap`, at the width its longest line already had, under the marker and continuation marker it had. A word longer than the width gets its own line. A comment after code stays on one line.
 
 A comment that loses all its prose loses its lines, delimiters included. When it follows code, only the comment goes. A block comment that has no prose but still shares its line with code keeps its delimiters.
 
@@ -58,7 +93,11 @@ Every edit goes through `treecomments.Apply`. The gate refuses an edit that reac
 
 ## comments/length
 
-`commentfix.IDLength`, the fixer `FixerLength` (label `comments/length`, `Place` `20`) and again `FixerLengthAgain` (label `comments/length-after-number`, `Place` `40`). A comment run weighs more than the code it documents.
+`commentfix.IDLength`, the fixer `FixerLength` (label `comments/length`, `Place` `20`) and again `FixerLengthAgain` (label `comments/length-after-number`, `Place` `40`). A comment run weighs more than the code it documents. The finding rule text is a join of these tells:
+
+- `the comment runs more lines than the code it documents`
+- `the comment runs longer than the code it documents`
+- `the comment documents nothing`
 
 The finding detail is the first non-blank line of the block, cut to `87` bytes and `...` when over `90`. The finding fix is `Cut the comment back inside the code it documents. slopfix fix does this.`
 
@@ -101,6 +140,19 @@ When both measures fail, the tells join with `, and `.
 
 The cap alone judgs a header block (above `package`). When it holds more prose lines than `maxLines`, `capLines` cuts it.
 
+`repair` fits a block, cutting only what must go:
+
+1. `repairProse` splits the directive lines out (`splitDirectives`). Directives that lead the block stay first, and those after the prose stay last. They come back verbatim. A block with no code beneath it keeps only its directives.
+2. `trim` removes banner lines, then tries each step until `judge` passes. The steps run in this order.
+   - `tighten` rewrites the prose with `english.FixN` on the `comment` surface and lays it out again. Paragraph breaks, code blocks and list items stay.
+   - `widen` lays the same words out at the width of the budget, `max(floorChars, codeChars)`.
+   - `cutLastThought` removes the last paragraph, then the last sentence of the last paragraph, then the lines back to the last sentence end. A paragraph cut must leave a block whose last line ends a sentence (`endsWell`).
+   - `steOpening` keeps the first sentence if it is a valid STE sentence, and `clauseFit` cuts it at the last clause boundary that fits.
+   - If no cut fits, the opening sentence is divided until its first part fits.
+   - Last, all the prose goes on one line with no word dropped (`oneLine`, which is `1 << 20`).
+3. `preferred` picks the earliest cut that keeps at least a third of the words of the longest cut.
+4. If the block still fails, the free text after each lint pragma is cut, and the pragma stays (`withoutPragmaProse`).
+
 The opening sentence is never cut. A block trimmed to nothing is a worse edit than a block left long. A block comment keeps its closer through every cut (`reclosed`). The Go convention of a bare `//` line between a doc and a directive after it is kept (`withSeparator`).
 
 `wrapWidth` is `78`, the width `reflow` lays prose out at.
@@ -109,7 +161,7 @@ The opening sentence is never cut. A block trimmed to nothing is a worse edit th
 
 ### Clause cuts
 
-`clauseCuts` reads `rules/comment-clauses.xml`. A mark ends a clause when a space follows it, and a word-length mark such as `--` needs a space before it too. Each opens a part the cut can drop and leave the claim before it true. A condition such as `when` or `if` is absent, because a cut before it changes the claim.
+`clauseCuts` reads `rules/comment-clauses.xml`. Its class `boundary` holds the marks `:`, `;`, `,` and `--`. A mark ends a clause when a space follows it, and a word-length mark such as `--` needs a space before it too. Its class `tail` holds `so`, `because` and `(`. Each opens a part the cut can drop and leave the claim before it true. A condition such as `when` or `if` is absent, because a cut before it changes the claim.
 
 A candidate cut must keep balanced brackets, backticks and quotes (`balanced`). It must not end on a word of the `dangling` class. It must close a whole sentence (`closesWhole`), except a cut at a colon, which keeps the statement the colon elaborates. A kept part gets a period when it lacks a sentence end. The file carries its own `<test>` entries, for example a comment with a colon clause that cuts back to the text before the colon.
 
@@ -126,8 +178,16 @@ A paragraph is a run of comment lines with one marker, broken at a blank comment
 Repair is `CloseProse`. It splits into sentences and looks at the last.
 
 1. If the last word does not dangle, or it ends a sentence, nothing changes.
-2. A clause that stands alone is kept.
+2. A clause that stands alone is kept. The last sentence up to the last word that ends in `,`, `;` or `:`, closed with a period (`lastClause`, `standsAlone`).
 3. Otherwise `wholeHead` drops words from the end until the head stands as a sentence. The head has at least `minimumHead` words, which is `3`. It does not end on a dangling word or on an `auxiliary` word.
+
+The `auxiliary` set holds these words:
+
+- `is`, `are`, `was`, `were`, `be` and `been`.
+- `has`, `have`, `had`, `do`, `does` and `did`.
+- `can`, `will`, `must`, `should`, `may`, `might`, `would` and `could`.
+- `it`, `they`, `which` and `that`.
+4. With nothing whole left, the fragment goes.
 
 `standsAlone` asks `ste.StandsAlone`. A doc comment opens on the name it documents. A clause also stands alone when `ste.StandsAlone` accepts it with `It` in place of its first word. That first word must start with a capital, hold none of `,;:()`, and be absent from the `openers` set. The `openers` set is `if when because since while unless until although though after before so and but or as where whether once the a an this that these those each every all some no for with to in on at by from of then only also`.
 
@@ -141,13 +201,14 @@ Detection reads each paragraph that `judged` accepts. `judged` rejects a verbati
 
 - A line with no prose.
 - A line that starts with `@`.
+- A list item opener, which is `-`, `*` or `+`, or digits followed by `.` or `)`, each with a space after.
 - A line break that ends a thought with no stop (`lineEndsThought`).
 
 `lineEndsThought` needs the line before the break to end on no mark and on no dangling word. It needs the line after the break to open with a capital or a list marker.
 
 Within a segment, `sentences` splits on sentence ends, and a lower-case word also opens a sentence there. A comment sentence frequently opens on a parameter name. Each sentence goes through `ste.Check`. A finding carries the lines the sentence covers (`Line` and `EndLine`), the sentence, and the tell and fix of the STE rule.
 
-Repair is `sentenceEdits`. Both halves must stay grammatical. The segment is laid out again at the width of its longest line, with its own marker, indent and continuation marker. A block comment aligns later lines under the opener's prose and keeps its closer. A comment after code, and a comment in a workflow, stay on one line.
+Repair is `sentenceEdits`. It divides each long sentence with `ste.FixSelected` limited to `ste/sentence-length`, `ste/semicolon` and `ste/comma-splice`. Both halves must stay grammatical. The segment is laid out again at the width of its longest line, with its own marker, indent and continuation marker. A block comment aligns later lines under the opener's prose and keeps its closer. A comment after code, and a comment in a workflow, stay on one line.
 
 A fixture holds the test that both repairs settle in one fix (`sentencecap_test.go`).
 
@@ -159,5 +220,17 @@ A sentence the rule cannot divide stays, and the finding asks for a rewrite by h
 - Every rule here skips a cgo preamble.
 - A doc comment's code block, written with a tab after the marker, stays verbatim (`para.verbatim`). So does a block comment line that carries no marker and sits past the opener's prose column.
 - A block comment with no closer is never rewritten (`blockPara` returns false).
-- The empty block `/**/` is read as `/*` plus `*/`.
+- `splitBlock` reads the markers `///`, `//!`, `//`, `/**`, `/*`, `#` and `*`, and the closer `*/`. The empty block `/**/` is read as `/*` plus `*/`.
 
+## Where this lives
+
+- `commentfix/commentfix.go` holds `Check`, `IsGenerated` and `Remedy`.
+- `commentfix/overlong.go` holds `CheckLength`, `judge` and `repair`.
+- `commentfix/tails.go` holds `CheckTails` and `CloseProse`.
+- `commentfix/sentences.go` holds the sentence form.
+- `commentfix/repair.go` holds the number repair and the fixers `FixerLength`, `FixerNumber` and `FixerLengthAgain`.
+- `commentfix/treeblocks.go` pairs comments with code.
+- `commentfix/residual.go`, `commentfix/guard.go` and `commentfix/labels.go` hold the last-resort deletion, the grammar guard and constant naming.
+- `treecomments/` holds the comment finder, the CMake and YAML readers, and the edit gate `treecomments.Apply`.
+- `code/` holds the grammar registry `code.grammars`, `code.IsComment` and the parse.
+- `rules/comment-clauses.xml` and `rules/comment-tails.xml` hold the clause and tail vocabulary with their tests.
