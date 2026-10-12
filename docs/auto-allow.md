@@ -1,4 +1,4 @@
-# auto-allow
+# auto-allow: the permission table
 
 `auto-allow` answers permission questions from a table. It approves read-only work, refuses programs this environment does not run, and refuses calls that reach a denied tree. Everything else gets no answer. The call takes the normal permission path. The package is `autoallow/`, and `autoallow.Run` in `autoallow/run.go` is its entry point.
 
@@ -244,3 +244,9 @@ The allow section is a read-only inspection list. It holds plain commands with `
 - `curl` allows any flags but only when every positional argument starts with `http://localhost:9120/read`. Its `flagsWithValue` list keeps header, data and output values out of the positional check.
 
 The ask section is empty on purpose. The ask section everything not allowed already reaches the user. An entry earns its place only by making a specific request louder than the default prompt.
+
+## See also
+
+- [clean-bash](clean-bash.md) for the rewrite that reaches this guard first
+- [hook-guards](hook-guards.md) for the guard table
+- [commands](commands.md) for the `hook` command and its event table

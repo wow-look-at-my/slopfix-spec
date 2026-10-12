@@ -1,6 +1,6 @@
-# Hook guards
+# hook-guards: the slopfix hook guards
 
-`slopfix hook` reads one hook payload on stdin and runs every guard that serves the event. This file covers the guards `write`, `laziness`, `blame-language`, `ask-properly`, `link-refs`, `busy-poll` and `md-budget`. [no-work-loss.md](no-work-loss.md) covers `no-work-loss`. `clean-bash` and `auto-allow` have their own files. The closing-message detectors behind three of the guards are in [message-rules.md](message-rules.md). [commands.md](commands.md) lists the event table.
+`slopfix hook` reads one hook payload on stdin and runs every guard that serves the event. This file covers the guards `write`, `laziness`, `blame-language`, `ask-properly`, `link-refs`, `busy-poll` and `md-budget`. [no-work-loss](no-work-loss.md) covers `no-work-loss`. `clean-bash` and `auto-allow` have their own files. The closing-message detectors behind three of the guards are in [message-rules](message-rules.md). [commands](commands.md) lists the event table.
 
 ## Dispatch
 
@@ -163,3 +163,10 @@ Events: SessionStart, PostToolUse and Stop. `mdbudget.Run` in `mdbudget/hook.go`
 - Stop: ignored when `stop_hook_active` is true or `session_id` is empty. For each recorded path that is still an offender and whose signature differs from the one in `fired`, the guard stores the signature. The guard adds the file to the refusal. Nothing to refuse means nothing. The marker is kept, so a file left unchanged never blocks twice, while a file touched again and left broken blocks again.
 - Stop verdict: stdout is `{"decision":"block","reason":"..."}` with exit `0`. The reason tells the model to move a section into `docs/<topic>.md` verbatim. The reason leave a one-line pointer, or to say plainly what it left oversized. A width-only offender gets the wrap remedy instead.
 - Every report ends with the remedy list from `remedy` and `remedyFor`: extraction, not summarization, and no appending to an oversized item.
+
+## See also
+
+- [clean-bash](clean-bash.md) and [auto-allow](auto-allow.md) for the guards with a page of their own
+- [no-work-loss](no-work-loss.md) for the `no-work-loss` guard
+- [message-rules](message-rules.md) for the detectors behind the message guards
+- [commands](commands.md) for the event table and `--only`
