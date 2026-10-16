@@ -70,6 +70,7 @@ A hit whose span lies outside the content is skipped. `TestNoReportedCountGoesUn
 `reword` in `counts/reword.go` finds the leading cardinal of the phrase with `cardinal.Leading`. A `~` before the number goes with it. Hedges from `approximations` (`about`, `roughly`, `around`, `approximately`, `nearly`, `almost`, `only`, `just`, `exactly`, `some`, `precisely`) in front of the number are dropped with it. The words before the number, back to the last clause break, choose what replaces it. The first case that matches wins:
 
 - A cap from behind: the text after the phrase matches `ceilingAfter` (`or fewer` or `or less`). The text becomes `a bounded number of ` plus the noun. The cap words are removed. `It keeps 500 lines or less.` becomes `It keeps a bounded number of lines.`
+- Zero that is the subject of a verb with an object (`cardinal.ValueSubject`): the number names a value that acts. The text is `a value of zero `. `0 disables chunking` reads `a value of zero disables chunking`.
 - Zero, when the phrase is no measurement: the text is `no `.
 - A measurement (`measures`: the second word of the phrase is a unit and the phrase has a few words): the number and the unit after it go, as in `64 MiB chunks`.
 - A preposition from `prepositionFloors` (`over`, `above`): the preposition stays and the number becomes `vague(n)`.
