@@ -20,7 +20,7 @@ It fails on a repairable rule no registered fixer serves.
 | Kind | Fixers, in order |
 |---|---|
 | source | `tombstones`, `comments/length`, `comments/number`, `comments/sentence-length`, `comments/length-after-number`, `pins/download-version`, `gofmt` |
-| document | `tombstones`, `counts/inventory-count`, `counts/section-number`, `wrap-and-ste`, `wrap/long-block`, `ste/count`, `pins/download-version` |
+| document | `tombstones`, `counts/inventory-count`, `counts/section-number`, `wrap-and-ste`, `wrap/long-block`, `counts/stated-count`, `pins/download-version` |
 | workflow | `yaml/ungate`, `yaml/join-comments`, `yaml/rename-guarded-job`, `comments/sentence-length`, `yaml/inline-env`, `yaml/filter-push`, `yaml/retarget-org-action`, `yaml/set-concurrency`, `pins/download-version` |
 
 

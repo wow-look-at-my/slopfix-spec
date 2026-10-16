@@ -73,11 +73,11 @@ A finding is an error unless its rule is in `ste.WarningIDs` or `workflow.Warnin
 | `wrap` | `wrap/long-block` | error |
 | `ste` | `ste/contraction` | error |
 | `ste` | `ste/modal` | error |
-| `ste` | `ste/semicolon` | error |
-| `ste` | `ste/comma-splice` | error |
+| `english` | `english/semicolon` | error |
+| `english` | `english/comma-splice` | error |
 | `ste` | `ste/sentence-length` | error |
-| `ste` | `ste/postdeterminer` | error |
-| `ste` | `ste/count` | error |
+| `counts` | `counts/postdeterminer` | error |
+| `counts` | `counts/stated-count` | error |
 | `ste` | `ste/instruction-length` | warning |
 | `ste` | `ste/passive` | warning |
 | `ste` | `ste/noun-cluster` | warning |
@@ -162,7 +162,7 @@ The same file holds the registry tests:
 `repairable_test.go` holds the claim that every rule carries a repair:
 
 - `TestEveryRuleCarriesARepair` requires `Repairable(id)` for every ID in `EveryID`.
-- `TestARepairIsClaimedRuleByRule` asserts `Repairable` for `ste/semicolon`, `wrap/hard-wrap`, `yaml/comment-block`, `yaml/neutered-gate`, `ste/passive`, `tombstones/comment-volume` and `repo/near-duplicate`.
+- `TestARepairIsClaimedRuleByRule` asserts `Repairable` for `english/semicolon`, `wrap/hard-wrap`, `yaml/comment-block`, `yaml/neutered-gate`, `ste/passive`, `tombstones/comment-volume` and `repo/near-duplicate`.
 - `TestAStaleCountIsRepairableUnderEitherID` asserts `Repairable` for `ste.IDStaleCount` and `IDInventoryCount`, because a stale count is reported under the prose ID and repaired under the counts ID.
 - `TestAnUnknownRuleIsNotRepairable` asserts `Repairable("ste/not-a-real-rule")` is false.
 - `TestTheRuleSetIsNotEmpty` requires `AllIDs` and `EveryID` to be non-empty. The coverage test passes on rules and not on an empty walk.
@@ -174,7 +174,7 @@ The same file holds the registry tests:
 - `README.md` gains a list item over `LongBlockCap` with a parenthesis that runs past the division target.
 - `main.go` holds a comment block over the `14` line cap above code longer than the cap. Plus a separate paragraph that states a count, so `comments/number` runs too.
 
-The test runs `CheckTreeWith` first. The test requires the corpus to hold a finding of each of these IDs: `ste/sentence-length`, `ste/semicolon`, `ste/contraction`, `ste/modal`, `wrap/hard-wrap`, `wrap/long-block`, `repo/budget`, `repo/package-scripts`, `repo/agents-file` and `yaml/push-tags`. This also covers `yaml/concurrency`, `yaml/all-builds-job`, `yaml/neutered-gate`, `yaml/comment-block`, `yaml/org-action-ref`, `pins/download-version`, `tombstones/comment-volume`, `comments/length` and `comments/number`. Then it runs `FixTreeWith` and requires `Unmet` to be empty and a second `CheckTreeWith` to hold no error. `errorLines` counts a finding that is not a warning, and every kept tombstone. The test also asserts specific repaired wording in `README.md`, and that `justfile` and `docs/agents-continued.md` exist.
+The test runs `CheckTreeWith` first. The test requires the corpus to hold a finding of each of these IDs: `ste/sentence-length`, `english/semicolon`, `ste/contraction`, `ste/modal`, `wrap/hard-wrap`, `wrap/long-block`, `repo/budget`, `repo/package-scripts`, `repo/agents-file` and `yaml/push-tags`. This also covers `yaml/concurrency`, `yaml/all-builds-job`, `yaml/neutered-gate`, `yaml/comment-block`, `yaml/org-action-ref`, `pins/download-version`, `tombstones/comment-volume`, `comments/length` and `comments/number`. Then it runs `FixTreeWith` and requires `Unmet` to be empty and a second `CheckTreeWith` to hold no error. `errorLines` counts a finding that is not a warning, and every kept tombstone. The test also asserts specific repaired wording in `README.md`, and that `justfile` and `docs/agents-continued.md` exist.
 
 ## The Fix loop
 

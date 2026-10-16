@@ -1,6 +1,6 @@
 # cardinal: is this number a count
 
-The `cardinal` package decides whether a number in a piece of text is a stated count. A stated count is true today and incorrect after the next commit. The package holds no rule ID. Rules call it: `counts/inventory-count` (`counts/counts.go`), `ste/count` (`ste/rules.go`) and `comments/number` (`commentfix/commentfix.go`). Each caller brings its own substrate. The substrate is the policy.
+The `cardinal` package decides whether a number in a piece of text is a stated count. A stated count is true today and incorrect after the next commit. The package holds no rule ID. Rules call it: `counts/inventory-count` (`counts/counts.go`), `counts/stated-count` (`ste/rules.go`) and `comments/number` (`commentfix/commentfix.go`). Each caller brings its own substrate. The substrate is the policy.
 
 ## Substrate
 
@@ -16,7 +16,7 @@ The substrates are package variables.
 
 | | `Prose` | `Gate` | `Comment` |
 | --- | --- | --- | --- |
-| Rule | `counts/inventory-count` | `ste/count` | `comments/number` |
+| Rule | `counts/inventory-count` | `counts/stated-count` | `comments/number` |
 | `Shape` | `Quantity` | `Quantity` | `Number` |
 | `Frame` | `true` | `false` | `false` |
 | `Words` | class `prose` | class `gate` | class `comment` |
