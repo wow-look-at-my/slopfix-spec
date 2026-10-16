@@ -114,7 +114,8 @@ A rewrite maps over, edits within or prepends to the statement list, so it can a
 | `stderr_merge` | `stripMerge` | drops a trailing `2>&1` |
 | `tee` | `teeRewrite` | turns a trailing stdout redirect into `\| tee` |
 | `sleep_cap` | `capSleep` | caps `sleep` |
-| `narration_remove` | `narration` | turns constant `echo` and `printf` into `:` |
+| `narration_remove` | `narration` | drops constant `echo` and `printf` from their list or chain |
+| `noop_remove` | `dropNoops` | drops a bare `true` or `:` from a list or chain that does real work |
 
 After the loop `apply("pipefail", ensurePipefail)` runs once.
 
@@ -221,7 +222,9 @@ Assignments and redirects on the call are preserved. It matches only a call whos
 
 ## narration_remove
 
-`bashclean/narration.go` replaces a constant `echo` or `printf` with the no-op `:` only when its stdout reaches the terminal. The whole command is replaced and not deleted, so the statement count never drops and the statement still succeeds.
+`bashclean/narration.go` turns a constant `echo` or `printf` into the no-op `:` only when its stdout reaches the terminal. `dropNoops` then removes that `:` from its list or chain. In a pipeline, or where its status decides a condition, the `:` stays. A command whose only work is narration stays as written, because the auto-allow guard refuses a command that runs nothing.
+
+`noop_remove` drops a bare `true` or `:` from a list or chain that does real work. A no-op stays where nothing else runs, as a pipeline stage. Those stays are as the last statement of a nested list, and before a read of `$?`. A `false` stays, because it fails the list.
 
 `isNarration` accepts `echo` with all-constant words, and `printf` with at least one word, all constant (`allConstant`). A word is constant (`wordIsConstant`) when it is made of literals. This holds with no glob character (`*`, `?`, `[`, `{`) and no leading `~`, single-quoted text, or double-quoted literals. A variable, command substitution or arithmetic makes it non-constant.
 
