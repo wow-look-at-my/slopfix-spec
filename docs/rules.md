@@ -103,6 +103,9 @@ A finding is an error unless its rule is in `ste.WarningIDs` or `workflow.Warnin
 | `yaml` | `yaml/comment-block` | error |
 | `yaml` | `yaml/all-builds-job` | error |
 | `yaml` | `yaml/neutered-gate` | error |
+| `yaml` | `yaml/duplicate-step-key` | error |
+| `yaml` | `yaml/run-script-syntax` | error |
+| `yaml` | `yaml/branch-pin` | error |
 | `yaml` | `yaml/env-indirection` | error |
 | `yaml` | `yaml/push-tags` | error |
 | `yaml` | `yaml/org-action-ref` | error |
