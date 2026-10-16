@@ -6,7 +6,7 @@ Rules judge a markdown document for a figure that goes stale. `counts/inventory-
 
 `proseLines` in `counts/counts.go` returns the lines that `markdown.Split` marks as `markdown.Prose`, each with its line number and byte offset. A fence, a table, a heading and an indented block are verbatim, and no rule reads them. `blankInlineCode` replaces each backtick span with spaces of the same length. A span is data and every offset stays valid. Both rules apply to a `fixer.Document` file only.
 
-Which number is a count is decided in the `cardinal` package. This package supplies the document: which lines to read, and how to cut the number out. The `cardinal.Substrate` values it uses are `cardinal.Prose` for `counts/inventory-count` and `cardinal.Gate` for the merge gate's `ste/count`. `Check` is `find` over `cardinal.Prose` with `blankInlineCode` as the mask. `Gate` is `find` over `cardinal.Gate` with `ste.Masked` as the mask. Both return `Hit` values, each holding the phrase, the trimmed line, the 1-based `LineNo` and the byte `Start` and `End` in the whole document.
+Which number is a count is decided in the `cardinal` package. This package supplies the document: which lines to read, and how to cut the number out. The `cardinal.Substrate` values it uses are `cardinal.Prose` for `counts/inventory-count` and `cardinal.Gate` for the merge gate's `counts/stated-count`. `Check` is `find` over `cardinal.Prose` with `blankInlineCode` as the mask. `Gate` is `find` over `cardinal.Gate` with `ste.Masked` as the mask. Both return `Hit` values, each holding the phrase, the trimmed line, the 1-based `LineNo` and the byte `Start` and `End` in the whole document.
 
 ## counts/inventory-count
 
@@ -43,7 +43,7 @@ A quantity with no frame is ordinary prose and is not reported. The sentence `Sp
 
 `Check` does not report a count that sits in a fence, a table, a heading, an indented block or a backtick span.
 
-### The merge gate's twin: ste/count
+### The merge gate's twin: counts/stated-count
 
 `Gate` reads the same document with `cardinal.Gate`: no frame and the `gate` word class (`two` to `twelve`). This also covers the pattern `gateQuantity`, and the exemptions `InExpression`, `FunctionWordGap`, `AfterAnArticle`, `ChoiceAmongASet`, `StatusCode`, `Labeled`, `SectionCite`, `IssueNumber`, `GPUName`, `WordSize`, `NoPluralNounAfter` and `Measure`. Its rule ID is `ste.IDStaleCount`, and [ste](ste-simplified-technical-english.md) holds its detection. This file covers its repair, because the repair is shared. In `Check` in `slopfix.go`, a gate finding with the same detail as an inventory finding in the same block is dropped. One phrase is reported once.
 
@@ -52,7 +52,7 @@ A quantity with no frame is ordinary prose and is not reported. The sentence `Sp
 Fixers are registered in `init` in `counts/counts.go`:
 
 - `counts/inventory-count`: `Place` is `20`. It runs before the paragraph join. The edits are `Edits(f.Text(), Check(f.Text()))`.
-- `ste/count`: `Place` is `40`. It runs after the join, because a hand wrap hides the frame the gate reads. The edits are `Edits(f.Text(), Gate(f.Text()))`.
+- `counts/stated-count`: `Place` is `40`. It runs after the join, because a hand wrap hides the frame the gate reads. The edits are `Edits(f.Text(), Gate(f.Text()))`.
 
 `Strip` and `StripGate` apply the same edits through `markdown.Apply` with an empty `edit.Scope` and return the text and the hits that were cut.
 
@@ -70,6 +70,7 @@ A hit whose span lies outside the content is skipped. `TestNoReportedCountGoesUn
 `reword` in `counts/reword.go` finds the leading cardinal of the phrase with `cardinal.Leading`. A `~` before the number goes with it. Hedges from `approximations` (`about`, `roughly`, `around`, `approximately`, `nearly`, `almost`, `only`, `just`, `exactly`, `some`, `precisely`) in front of the number are dropped with it. The words before the number, back to the last clause break, choose what replaces it. The first case that matches wins:
 
 - A cap from behind: the text after the phrase matches `ceilingAfter` (`or fewer` or `or less`). The text becomes `a bounded number of ` plus the noun. The cap words are removed. `It keeps 500 lines or less.` becomes `It keeps a bounded number of lines.`
+- Zero that is the subject of a verb with an object (`cardinal.ValueSubject`): the number names a value that acts. The text is `a value of zero `. `0 disables chunking` reads `a value of zero disables chunking`.
 - Zero, when the phrase is no measurement: the text is `no `.
 - A measurement (`measures`: the second word of the phrase is a unit and the phrase has a few words): the number and the unit after it go, as in `64 MiB chunks`.
 - A preposition from `prepositionFloors` (`over`, `above`): the preposition stays and the number becomes `vague(n)`.
@@ -173,5 +174,5 @@ A link written by this rule and a heading with a new slug: `[§old-name](#9-owni
 
 - [cardinal](cardinal.md) for which number is a count
 - [inventory-list](inventory-list.md) for the enumeration rule beside the count rule
-- [ste-simplified-technical-english](ste-simplified-technical-english.md) for the merge gate's twin, `ste/count`
+- [ste-simplified-technical-english](ste-simplified-technical-english.md) for the merge gate's twin, `counts/stated-count`
 - [markdown](markdown.md) for the prose blocks the rules read

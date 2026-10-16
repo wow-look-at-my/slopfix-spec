@@ -208,7 +208,7 @@ Detection reads each paragraph that `judged` accepts. `judged` rejects a verbati
 
 Within a segment, `sentences` splits on sentence ends, and a lower-case word also opens a sentence there. A comment sentence frequently opens on a parameter name. Each sentence goes through `ste.Check`. A finding carries the lines the sentence covers (`Line` and `EndLine`), the sentence, and the tell and fix of the STE rule.
 
-Repair is `sentenceEdits`. It divides each long sentence with `ste.FixSelected` limited to `ste/sentence-length`, `ste/semicolon` and `ste/comma-splice`. Both halves must stay grammatical. The segment is laid out again at the width of its longest line, with its own marker, indent and continuation marker. A block comment aligns later lines under the opener's prose and keeps its closer. A comment after code, and a comment in a workflow, stay on one line.
+Repair is `sentenceEdits`. It divides each long sentence with `ste.FixSelected` limited to `ste/sentence-length`, `english/semicolon` and `english/comma-splice`. Both halves must stay grammatical. The segment is laid out again at the width of its longest line, with its own marker, indent and continuation marker. A block comment aligns later lines under the opener's prose and keeps its closer. A comment after code, and a comment in a workflow, stay on one line.
 
 A fixture holds the test that both repairs settle in one fix (`sentencecap_test.go`).
 
