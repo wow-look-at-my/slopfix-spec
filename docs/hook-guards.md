@@ -18,6 +18,7 @@
 | `link-refs` | MessageDisplay | `linkrefs.Run` |
 | `blame-language` | MessageDisplay | `blamelanguage.Run` |
 | `ask-properly` | MessageDisplay | `askproperly.Run` |
+| `twelve-hour` | MessageDisplay | `twelvehour.Rewrite` |
 
 - The event names are the constants `eventPreToolUse`, `eventPermissionRequest`, `eventPostToolUse`, `eventSessionStart`, `eventStop` and `eventMessageDisplay`.
 - `eventOf` reads `hook_event_name`. A payload with a `tool_name` and no event name counts as PreToolUse, for a payload built by hand. An unparseable payload has no event, so no guard serves it.
